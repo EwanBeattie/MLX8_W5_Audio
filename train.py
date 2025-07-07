@@ -111,12 +111,12 @@ def config_train(config = None):
     for i in range(config['num_configs']):
         run_name = f'zeus-config-{i+1}'
         wandb.init(entity=run_config['entity'], project=run_config['project'], config=config, name=run_name)
-        config = wandb.config
+        wandb_config = wandb.config
 
         print(f"\n{'='*50}")
         print(f"CONFIGURATION {i+1}")
         print(f"{'='*50}")
-        train(config)
+        train(wandb_config)
 
 
 
