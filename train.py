@@ -83,6 +83,7 @@ def train(config):
     test_acc = 100 * test_correct / test_total
     print(f"Final Test Accuracy: {test_acc:.2f}%")
     wandb.log({'test_acc': test_acc})
+    wandb.finish()
 
     return test_acc
 
