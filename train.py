@@ -34,7 +34,9 @@ def train_with_folds(train_folds, val_folds, test_folds):
         train_loss = 0
         
         print(f"Epoch [{epoch + 1}/{num_epochs}]")
-        for batch_idx, (data, targets) in enumerate(tqdm(train_loader)):
+        for batch_idx, batch in enumerate(tqdm(train_loader)):
+            data = batch['audio']
+            targets = batch['label']
             data, targets = data.to(device), targets.to(device)
             
             optimizer.zero_grad()
@@ -50,7 +52,9 @@ def train_with_folds(train_folds, val_folds, test_folds):
         val_correct = 0
         val_total = 0
         with torch.no_grad():
-            for data, targets in val_loader:
+            for batch in val_loader:
+                data = batch['audio']
+                targets = batch['label']
                 data, targets = data.to(device), targets.to(device)
                 outputs = model(data)
                 _, predicted = torch.max(outputs.data, 1)
@@ -65,7 +69,9 @@ def train_with_folds(train_folds, val_folds, test_folds):
     test_correct = 0
     test_total = 0
     with torch.no_grad():
-        for data, targets in test_loader:
+        for batch in test_loader:
+            data = batch['audio']
+            targets = batch['label']
             data, targets = data.to(device), targets.to(device)
             outputs = model(data)
             _, predicted = torch.max(outputs.data, 1)

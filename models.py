@@ -19,8 +19,8 @@ class CNN(nn.Module):
        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
        # 2nd convolutional layer
        self.conv2 = nn.Conv1d(in_channels=8, out_channels=16, kernel_size=3, padding=1)
-       # Fully connected layer
-       self.fc1 = nn.Linear(16 * 7 * 7, num_classes)
+       # Fully connected layer - calculate correct input size: 16 * (88200 // 4) = 16 * 22050 = 352800
+       self.fc1 = nn.Linear(16 * 22050, num_classes)
 
    def forward(self, x):
        """
