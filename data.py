@@ -11,13 +11,30 @@ def pad_audio(audio_array, target_length=88200):  # 4 seconds at 22kHz
     else:
         padding = target_length - len(audio_array)
         return torch.nn.functional.pad(torch.tensor(audio_array), (0, padding)).numpy()
+    
+def preprocess_dataset(dataset):
+    """Preprocess audio data to fixed length."""
+    print("Preprocessing audio data...")
+    processed_data = []
+    
+    for i, sample in enumerate(dataset):
+        audio_array = sample['audio']['array']
+        padded_audio = pad_audio(audio_array)
+        
+        processed_sample = {
+            'audio': torch.tensor(padded_audio, dtype=torch.float32).unsqueeze(0),  # Add channel dim
+            'label': sample['classID'],
+            'fold': sample['fold']
+        }
+        processed_data.append(processed_sample)
+        
+        if i % 100 == 0:
+            print(f"Processed {i}/{len(dataset)} samples")
+    
+    print(f"Preprocessing complete. Total samples: {len(processed_data)}")
+    return processed_data
 
 def load_or_cache_dataset(cache_path="dataset.pkl", streaming=True):
-    # if streaming:
-    #     print("Loading dataset in streaming mode...")
-    #     ds = load_dataset("danavery/urbansound8K", streaming=True, split="train")
-    #     return ds
-
     """Load dataset from cache or download and cache it."""
     if os.path.exists(cache_path):
         print(f"Loading dataset from {cache_path}")
@@ -25,14 +42,12 @@ def load_or_cache_dataset(cache_path="dataset.pkl", streaming=True):
             return pickle.load(f)
     else:
         print("Downloading dataset...")
-        ds = load_dataset("danavery/urbansound8K", split="train")
+        ds = load_dataset("danavery/urbansound8K", split="train[:1]")
         preprocessed_dataset = preprocess_dataset(ds)
         print(f"Saving dataset to {cache_path}")
         with open(cache_path, 'wb') as f:
             pickle.dump(preprocessed_dataset, f)
         return preprocessed_dataset
-
-ds = load_or_cache_dataset()
 
 def get_fold_splits(dataset, train_folds, val_folds, test_folds):
     """
@@ -72,29 +87,4 @@ def get_fold_splits(dataset, train_folds, val_folds, test_folds):
     
     return train_indices, val_indices, test_indices
 
-def preprocess_dataset(dataset):
-    """Preprocess audio data to fixed length."""
-    print("Preprocessing audio data...")
-    processed_data = []
-    
-    for i, sample in enumerate(dataset):
-        audio_array = sample['audio']['array']
-        padded_audio = pad_audio(audio_array)
-        
-        processed_sample = {
-            'audio': torch.tensor(padded_audio, dtype=torch.float32).unsqueeze(0),  # Add channel dim
-            'label': sample['classID'],
-            'fold': sample['fold']
-        }
-        processed_data.append(processed_sample)
-        
-        if i % 100 == 0:
-            print(f"Processed {i}/{len(dataset)} samples")
-    
-    print(f"Preprocessing complete. Total samples: {len(processed_data)}")
-    return processed_data
-
-# Preprocess the dataset
-processed_ds = preprocess_dataset(ds)
-
-get_fold_splits(processed_ds, train_folds=[1,2,3], val_folds=[6,4,5,8,7,9], test_folds=[10])
+ds = load_or_cache_dataset()
