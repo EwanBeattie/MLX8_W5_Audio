@@ -109,7 +109,7 @@ def config_train(config = None):
 
     test_accuracies = []
     for i in range(config['num_configs']):
-        run_name = f'zeus-config-{i+1}'
+        run_name = f'hades-config-{i+1}'
         wandb.init(entity=run_config['entity'], project=run_config['project'], config=config, name=run_name)
         wandb_config = wandb.config
 
