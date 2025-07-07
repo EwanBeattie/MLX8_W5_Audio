@@ -1,8 +1,8 @@
 hyperparameters = {
     'batch_size': 32,
     'learning_rate': 0.001,
-    'num_epochs': 10,
-    'num_configs': 10,
+    'num_epochs': 3,
+    'num_configs': 3,
 }
 
 sweep_config = {
