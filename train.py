@@ -121,9 +121,6 @@ def config_train(config = None):
     
     avg_test_accuracy = sum(test_accuracies) / len(test_accuracies)
     print(f"\nAverage Test Accuracy across all configurations: {avg_test_accuracy:.2f}%")
-    wandb.log({'avg_test_acc': avg_test_accuracy})
-
-
 
 # Run different fold configurations
 random.seed(42)
