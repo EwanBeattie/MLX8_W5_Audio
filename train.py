@@ -107,7 +107,7 @@ def config_train(config = None):
     if config is None:
         config = sweep_config
 
-
+    test_accuracies = []
     for i in range(config['num_configs']):
         run_name = f'zeus-config-{i+1}'
         wandb.init(entity=run_config['entity'], project=run_config['project'], config=config, name=run_name)
@@ -116,7 +116,12 @@ def config_train(config = None):
         print(f"\n{'='*50}")
         print(f"CONFIGURATION {i+1}")
         print(f"{'='*50}")
-        train(wandb_config)
+        test_accuracy = train(wandb_config)
+        test_accuracies.append(test_accuracy)
+    
+    avg_test_accuracy = sum(test_accuracies) / len(test_accuracies)
+    print(f"\nAverage Test Accuracy across all configurations: {avg_test_accuracy:.2f}%")
+    wandb.log({'avg_test_acc': avg_test_accuracy})
 
 
 
