@@ -6,22 +6,23 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 import random
+from configs import hyperparameters, sweep_config, run_config
+import wandb
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-num_epochs = 1
-
-def train_with_folds(train_folds, val_folds, test_folds):
+def train(config):
     """Train model with specified fold configuration."""
+    train_folds, val_folds, test_folds = generate_fold_configurations()
     print(f"\nTraining with folds - Train: {train_folds}, Val: {val_folds}, Test: {test_folds}")
     
     # Get fold splits
     train_indices, val_indices, test_indices = get_fold_splits(ds, train_folds, val_folds, test_folds)
     
     # Create dataloaders
-    train_loader = DataLoader(Subset(ds, train_indices), batch_size=32, shuffle=True)
-    val_loader = DataLoader(Subset(ds, val_indices), batch_size=32, shuffle=False)
-    test_loader = DataLoader(Subset(ds, test_indices), batch_size=32, shuffle=False)
+    train_loader = DataLoader(Subset(ds, train_indices), batch_size=config.batch_size, shuffle=True)
+    val_loader = DataLoader(Subset(ds, val_indices), batch_size=config.batch_size, shuffle=False)
+    test_loader = DataLoader(Subset(ds, test_indices), batch_size=config.batch_size, shuffle=False)
     
     # Initialize model
     model = CNN(in_channels=1, num_classes=10).to(device)
@@ -29,11 +30,11 @@ def train_with_folds(train_folds, val_folds, test_folds):
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     
     # Training loop
-    for epoch in range(num_epochs):
+    for epoch in range(config.num_epochs):
         model.train()
         train_loss = 0
         
-        print(f"Epoch [{epoch + 1}/{num_epochs}]")
+        print(f"Epoch [{epoch + 1}/{config.num_epochs}]")
         for batch_idx, batch in enumerate(tqdm(train_loader)):
             data = batch['audio']
             targets = batch['label']
@@ -82,12 +83,7 @@ def train_with_folds(train_folds, val_folds, test_folds):
     print(f"Final Test Accuracy: {test_acc:.2f}%")
     return test_acc
 
-# Run different fold configurations
-random.seed(42)
-used_test_folds = set()
-all_folds = list(range(1, 11))
-
-for i in range(3):  # Run 3 configurations
+def generate_fold_configurations():
     # Pick random test fold that hasn't been used
     available_test_folds = [f for f in all_folds if f not in used_test_folds]
     test_fold = random.choice(available_test_folds)
@@ -99,8 +95,35 @@ for i in range(3):  # Run 3 configurations
     
     # Remaining folds for training
     train_folds = [f for f in all_folds if f not in [test_fold, val_fold]]
-    
-    print(f"\n{'='*50}")
-    print(f"CONFIGURATION {i+1}")
-    print(f"{'='*50}")
-    train_with_folds(train_folds, [val_fold], [test_fold])
+
+    return train_folds, val_fold, test_fold
+
+def config_train(config = None):
+    # Obtain correct cofig dict, init wandb then create wandb.config object
+    if config is None:
+        config = sweep_config
+    wandb.init(entity=run_config['entity'], project=run_config['project'], config=config)
+    config = wandb.config
+
+    for i in range(r.num_configs):  # Run 3 configurations
+        print(f"\n{'='*50}")
+        print(f"CONFIGURATION {i+1}")
+        print(f"{'='*50}")
+        train()
+
+# Run different fold configurations
+random.seed(42)
+used_test_folds = set()
+all_folds = list(range(1, 11))
+
+if run_config['run_type'] == 'sweep':
+    sweep_id = wandb.sweep(sweep_config, entity=run_config['entity'], project=run_config['project'])
+    wandb.agent(
+        sweep_id=sweep_id,
+        function=config_train,
+        project=run_config['project'],
+        count=5,
+    )
+elif run_config['run_type'] == 'train':
+    trained_weights = config_train(hyperparameters)
+    torch.save(trained_weights, "model_weights.pth")
