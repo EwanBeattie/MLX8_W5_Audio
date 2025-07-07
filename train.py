@@ -9,7 +9,9 @@ import random
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-def train_with_folds(train_folds, val_folds, test_folds, num_epochs=10):
+num_epochs = 1
+
+def train_with_folds(train_folds, val_folds, test_folds):
     """Train model with specified fold configuration."""
     print(f"\nTraining with folds - Train: {train_folds}, Val: {val_folds}, Test: {test_folds}")
     
@@ -95,4 +97,4 @@ for i in range(3):  # Run 3 configurations
     print(f"\n{'='*50}")
     print(f"CONFIGURATION {i+1}")
     print(f"{'='*50}")
-    train_with_folds(train_folds, [val_fold], [test_fold], num_epochs=5)
+    train_with_folds(train_folds, [val_fold], [test_fold])
