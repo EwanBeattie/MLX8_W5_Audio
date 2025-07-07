@@ -42,7 +42,7 @@ def load_or_cache_dataset(cache_path="dataset.pkl", streaming=True):
             return pickle.load(f)
     else:
         print("Downloading dataset...")
-        ds = load_dataset("danavery/urbansound8K", split="train[:10]")
+        ds = load_dataset("danavery/urbansound8K", split="train[:50]")
         preprocessed_dataset = preprocess_dataset(ds)
         print(f"Saving dataset to {cache_path}")
         with open(cache_path, 'wb') as f:

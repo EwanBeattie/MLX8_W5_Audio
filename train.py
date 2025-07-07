@@ -11,7 +11,7 @@ import wandb
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-def train(config):
+def train(model, optimizer, criterion, config):
     """Train model with specified fold configuration."""
     train_folds, val_folds, test_folds = generate_fold_configurations()
     print(f"\nTraining with folds - Train: {train_folds}, Val: {val_folds}, Test: {test_folds}")
@@ -23,12 +23,7 @@ def train(config):
     train_loader = DataLoader(Subset(ds, train_indices), batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(Subset(ds, val_indices), batch_size=config.batch_size, shuffle=False)
     test_loader = DataLoader(Subset(ds, test_indices), batch_size=config.batch_size, shuffle=False)
-    
-    # Initialize model
-    model = CNN(in_channels=1, num_classes=10).to(device)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    
+
     # Training loop
     for epoch in range(config.num_epochs):
         model.train()
@@ -105,11 +100,16 @@ def config_train(config = None):
     wandb.init(entity=run_config['entity'], project=run_config['project'], config=config)
     config = wandb.config
 
+    # Initialize model
+    model = CNN(in_channels=1, num_classes=10).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
     for i in range(config.num_configs):  # Run 3 configurations
         print(f"\n{'='*50}")
         print(f"CONFIGURATION {i+1}")
         print(f"{'='*50}")
-        train(config)
+        train(model, optimizer, criterion, config)
 
 # Run different fold configurations
 random.seed(42)
