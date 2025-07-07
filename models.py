@@ -19,8 +19,12 @@ class CNN(nn.Module):
        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
        # 2nd convolutional layer
        self.conv2 = nn.Conv1d(in_channels=8, out_channels=16, kernel_size=3, padding=1)
-       # Fully connected layer - calculate correct input size: 16 * (88200 // 4) = 16 * 22050 = 352800
-       self.fc1 = nn.Linear(16 * 22050, num_classes)
+       # Fully connected layers with gradual dimension reduction
+       self.fc1 = nn.Linear(16 * 22050, 512)
+       self.dropout1 = nn.Dropout(0.5)
+       self.fc2 = nn.Linear(512, 128)
+       self.dropout2 = nn.Dropout(0.5)
+       self.fc3 = nn.Linear(128, num_classes)
 
    def forward(self, x):
        """
@@ -38,5 +42,9 @@ class CNN(nn.Module):
        x = F.relu(self.conv2(x))  # Apply second convolution and ReLU activation
        x = self.pool(x)           # Apply max pooling
        x = x.reshape(x.shape[0], -1)  # Flatten the tensor
-       x = self.fc1(x)            # Apply fully connected layer
+       x = F.relu(self.fc1(x))    # First FC layer with ReLU
+       x = self.dropout1(x)       # Dropout for regularization
+       x = F.relu(self.fc2(x))    # Second FC layer with ReLU
+       x = self.dropout2(x)       # Dropout for regularization
+       x = self.fc3(x)            # Final output layer
        return x
