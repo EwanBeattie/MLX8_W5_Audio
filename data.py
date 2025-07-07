@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader, Subset
 import pickle
 import os
 import torch
+import torchaudio
 
 def pad_audio(audio_array, target_length=88200):  # 4 seconds at 22kHz
     """Pad or truncate audio to fixed length."""
@@ -11,43 +12,73 @@ def pad_audio(audio_array, target_length=88200):  # 4 seconds at 22kHz
     else:
         padding = target_length - len(audio_array)
         return torch.nn.functional.pad(torch.tensor(audio_array), (0, padding)).numpy()
-    
+
 def preprocess_dataset(dataset):
-    """Preprocess audio data to fixed length."""
-    print("Preprocessing audio data...")
+    """Preprocess audio data to mel spectrograms."""
+    print("Preprocessing audio data to mel spectrograms...")
     processed_data = []
+    
+    # Create mel spectrogram transform
+    mel_transform = torchaudio.transforms.MelSpectrogram(
+        sample_rate=22050,
+        n_fft=2048,
+        hop_length=512,
+        n_mels=80,
+        f_min=0.0,
+        f_max=8000.0
+    )
     
     for i, sample in enumerate(dataset):
         audio_array = sample['audio']['array']
         padded_audio = pad_audio(audio_array)
         
+        # Convert to tensor and create mel spectrogram
+        audio_tensor = torch.tensor(padded_audio, dtype=torch.float32)
+        mel_spec = mel_transform(audio_tensor)
+        
+        # Apply log scaling for better representation
+        log_mel_spec = torch.log(mel_spec + 1e-8)
+        
         processed_sample = {
-            'audio': torch.tensor(padded_audio, dtype=torch.float32).unsqueeze(0),  # Add channel dim
+            'audio': log_mel_spec.unsqueeze(0),  # Add channel dim: [1, n_mels, time]
             'label': sample['classID'],
             'fold': sample['fold']
         }
         processed_data.append(processed_sample)
         
         if i % 100 == 0:
-            print(f"Processed {i}/{len(dataset)} samples")
+            print(f"Processed {i}/{len(dataset)} samples, spec shape: {log_mel_spec.shape}")
     
     print(f"Preprocessing complete. Total samples: {len(processed_data)}")
     return processed_data
 
-def load_or_cache_dataset(cache_path="dataset.pkl", streaming=True):
+def load_or_cache_dataset(raw_cache_path="raw_dataset.pkl", processed_cache_path="processed_dataset.pkl"):
     """Load dataset from cache or download and cache it."""
-    if os.path.exists(cache_path):
-        print(f"Loading dataset from {cache_path}")
-        with open(cache_path, 'rb') as f:
+    # Check if processed data exists
+    if os.path.exists(processed_cache_path):
+        print(f"Loading processed dataset from {processed_cache_path}")
+        with open(processed_cache_path, 'rb') as f:
             return pickle.load(f)
+    
+    # Check if raw data exists
+    if os.path.exists(raw_cache_path):
+        print(f"Loading raw dataset from {raw_cache_path}")
+        with open(raw_cache_path, 'rb') as f:
+            raw_ds = pickle.load(f)
     else:
         print("Downloading dataset...")
-        ds = load_dataset("danavery/urbansound8K", split="train")
-        preprocessed_dataset = preprocess_dataset(ds)
-        print(f"Saving dataset to {cache_path}")
-        with open(cache_path, 'wb') as f:
-            pickle.dump(preprocessed_dataset, f)
-        return preprocessed_dataset
+        raw_ds = load_dataset("danavery/urbansound8K", split="train")
+        print(f"Saving raw dataset to {raw_cache_path}")
+        with open(raw_cache_path, 'wb') as f:
+            pickle.dump(raw_ds, f)
+    
+    # Process the raw data
+    processed_dataset = preprocess_dataset(raw_ds)
+    print(f"Saving processed dataset to {processed_cache_path}")
+    with open(processed_cache_path, 'wb') as f:
+        pickle.dump(processed_dataset, f)
+    
+    return processed_dataset
 
 def get_fold_splits(dataset, train_folds, val_folds, test_folds):
     """
