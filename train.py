@@ -11,7 +11,7 @@ import wandb
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-def train(model, optimizer, criterion, config):
+def train(config):
     """Train model with specified fold configuration."""
     train_folds, val_folds, test_folds = generate_fold_configurations()
     print(f"\nTraining with folds - Train: {train_folds}, Val: {val_folds}, Test: {test_folds}")
@@ -23,6 +23,11 @@ def train(model, optimizer, criterion, config):
     train_loader = DataLoader(Subset(ds, train_indices), batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(Subset(ds, val_indices), batch_size=config.batch_size, shuffle=False)
     test_loader = DataLoader(Subset(ds, test_indices), batch_size=config.batch_size, shuffle=False)
+
+    # Initialize model
+    model = CNN(in_channels=1, num_classes=10).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     # Training loop
     for epoch in range(config.num_epochs):
@@ -60,26 +65,26 @@ def train(model, optimizer, criterion, config):
         val_acc = 100 * val_correct / val_total
         print(f"Train Loss: {train_loss/len(train_loader):.4f}, Val Acc: {val_acc:.2f}%")
         wandb.log({'loss': loss.item(), 'val_acc': val_acc})
-    
-    # Test
-    model.eval()
-    test_correct = 0
-    test_total = 0
-    with torch.no_grad():
-        for batch in test_loader:
-            data = batch['audio']
-            targets = batch['label']
-            data, targets = data.to(device), targets.to(device)
-            outputs = model(data)
-            _, predicted = torch.max(outputs.data, 1)
-            test_total += targets.size(0)
-            test_correct += (predicted == targets).sum().item()
-    
-    test_acc = 100 * test_correct / test_total
-    print(f"Final Test Accuracy: {test_acc:.2f}%")
-    wandb.log({'test_acc': test_acc})
 
-    return test_acc
+        # Test
+        model.eval()
+        test_correct = 0
+        test_total = 0
+        with torch.no_grad():
+            for batch in test_loader:
+                data = batch['audio']
+                targets = batch['label']
+                data, targets = data.to(device), targets.to(device)
+                outputs = model(data)
+                _, predicted = torch.max(outputs.data, 1)
+                test_total += targets.size(0)
+                test_correct += (predicted == targets).sum().item()
+        
+        test_acc = 100 * test_correct / test_total
+        print(f"Final Test Accuracy: {test_acc:.2f}%")
+        wandb.log({'test_acc': test_acc})
+
+        return test_acc
 
 def generate_fold_configurations():
     # Pick random test fold that hasn't been used
@@ -100,19 +105,19 @@ def config_train(config = None):
     # Obtain correct cofig dict, init wandb then create wandb.config object
     if config is None:
         config = sweep_config
-    wandb.init(entity=run_config['entity'], project=run_config['project'], config=config)
-    config = wandb.config
 
-    # Initialize model
-    model = CNN(in_channels=1, num_classes=10).to(device)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    for i in range(config.num_configs):  # Run 3 configurations
+    for i in range(config['num_configs']):
+        run_name = f'zeus-config-{i+1}'
+        wandb.init(entity=run_config['entity'], project=run_config['project'], config=config, name=run_name)
+        config = wandb.config
+
         print(f"\n{'='*50}")
         print(f"CONFIGURATION {i+1}")
         print(f"{'='*50}")
-        train(model, optimizer, criterion, config)
+        train(config)
+
+
 
 # Run different fold configurations
 random.seed(42)
