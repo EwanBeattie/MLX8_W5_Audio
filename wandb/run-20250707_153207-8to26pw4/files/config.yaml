@@ -1,0 +1,52 @@
+_wandb:
+    value:
+        cli_version: 0.21.0
+        e:
+            81b82uvphfunxm2ctx3034d6g0uai8fw:
+                codePath: train.py
+                codePathLocal: train.py
+                cpu_count: 2
+                cpu_count_logical: 4
+                disk:
+                    /:
+                        total: "250790436864"
+                        used: "249068437504"
+                email: ewanbeattie1@gmail.com
+                executable: /Users/donation/Documents/MLX/Week_5/MLX8_W5_Audio/.venv/bin/python
+                git:
+                    commit: 6ff193591bd7fe69101bb86da604766a3385ba25
+                    remote: https://github.com/EwanBeattie/MLX8_W5_Audio
+                host: donation-6.local
+                memory:
+                    total: "8589934592"
+                os: macOS-12.7.6-x86_64-i386-64bit
+                program: /Users/donation/Documents/MLX/Week_5/MLX8_W5_Audio/train.py
+                python: CPython 3.10.4
+                root: /Users/donation/Documents/MLX/Week_5/MLX8_W5_Audio
+                startedAt: "2025-07-07T14:32:07.089760Z"
+                writerId: 81b82uvphfunxm2ctx3034d6g0uai8fw
+        m: []
+        python_version: 3.10.4
+        t:
+            "1":
+                - 1
+                - 49
+                - 51
+            "2":
+                - 1
+                - 49
+                - 51
+            "3":
+                - 16
+            "4": 3.10.4
+            "5": 0.21.0
+            "12": 0.21.0
+            "13": darwin-x86_64
+batch_size:
+    value: 32
+epochs:
+    value: 10
+learning_rate:
+    value: 0.001
+num_configs:
+    value: 3

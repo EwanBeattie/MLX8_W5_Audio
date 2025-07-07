@@ -1,0 +1,28 @@
+{
+  "os":  "macOS-12.7.6-x86_64-i386-64bit",
+  "python":  "CPython 3.10.4",
+  "startedAt":  "2025-07-07T14:32:07.089760Z",
+  "program":  "/Users/donation/Documents/MLX/Week_5/MLX8_W5_Audio/train.py",
+  "codePath":  "train.py",
+  "codePathLocal":  "train.py",
+  "git":  {
+    "remote":  "https://github.com/EwanBeattie/MLX8_W5_Audio",
+    "commit":  "6ff193591bd7fe69101bb86da604766a3385ba25"
+  },
+  "email":  "ewanbeattie1@gmail.com",
+  "root":  "/Users/donation/Documents/MLX/Week_5/MLX8_W5_Audio",
+  "host":  "donation-6.local",
+  "executable":  "/Users/donation/Documents/MLX/Week_5/MLX8_W5_Audio/.venv/bin/python",
+  "cpu_count":  2,
+  "cpu_count_logical":  4,
+  "disk":  {
+    "/":  {
+      "total":  "250790436864",
+      "used":  "249068437504"
+    }
+  },
+  "memory":  {
+    "total":  "8589934592"
+  },
+  "writerId":  "81b82uvphfunxm2ctx3034d6g0uai8fw"
+}

@@ -17,7 +17,7 @@ def train(config):
     print(f"\nTraining with folds - Train: {train_folds}, Val: {val_folds}, Test: {test_folds}")
     
     # Get fold splits
-    train_indices, val_indices, test_indices = get_fold_splits(ds, train_folds, val_folds, test_folds)
+    train_indices, val_indices, test_indices = get_fold_splits(ds, train_folds, [val_folds], [test_folds])
     
     # Create dataloaders
     train_loader = DataLoader(Subset(ds, train_indices), batch_size=config.batch_size, shuffle=True)
@@ -105,11 +105,11 @@ def config_train(config = None):
     wandb.init(entity=run_config['entity'], project=run_config['project'], config=config)
     config = wandb.config
 
-    for i in range(r.num_configs):  # Run 3 configurations
+    for i in range(config.num_configs):  # Run 3 configurations
         print(f"\n{'='*50}")
         print(f"CONFIGURATION {i+1}")
         print(f"{'='*50}")
-        train()
+        train(config)
 
 # Run different fold configurations
 random.seed(42)
