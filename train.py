@@ -66,25 +66,25 @@ def train(config):
         print(f"Train Loss: {train_loss/len(train_loader):.4f}, Val Acc: {val_acc:.2f}%")
         wandb.log({'loss': loss.item(), 'val_acc': val_acc})
 
-        # Test
-        model.eval()
-        test_correct = 0
-        test_total = 0
-        with torch.no_grad():
-            for batch in test_loader:
-                data = batch['audio']
-                targets = batch['label']
-                data, targets = data.to(device), targets.to(device)
-                outputs = model(data)
-                _, predicted = torch.max(outputs.data, 1)
-                test_total += targets.size(0)
-                test_correct += (predicted == targets).sum().item()
-        
-        test_acc = 100 * test_correct / test_total
-        print(f"Final Test Accuracy: {test_acc:.2f}%")
-        wandb.log({'test_acc': test_acc})
+    # Test
+    model.eval()
+    test_correct = 0
+    test_total = 0
+    with torch.no_grad():
+        for batch in test_loader:
+            data = batch['audio']
+            targets = batch['label']
+            data, targets = data.to(device), targets.to(device)
+            outputs = model(data)
+            _, predicted = torch.max(outputs.data, 1)
+            test_total += targets.size(0)
+            test_correct += (predicted == targets).sum().item()
+    
+    test_acc = 100 * test_correct / test_total
+    print(f"Final Test Accuracy: {test_acc:.2f}%")
+    wandb.log({'test_acc': test_acc})
 
-        return test_acc
+    return test_acc
 
 def generate_fold_configurations():
     # Pick random test fold that hasn't been used
