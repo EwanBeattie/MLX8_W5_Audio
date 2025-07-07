@@ -59,6 +59,7 @@ def train(model, optimizer, criterion, config):
         
         val_acc = 100 * val_correct / val_total
         print(f"Train Loss: {train_loss/len(train_loader):.4f}, Val Acc: {val_acc:.2f}%")
+        wandb.log({'loss': loss.item(), 'val_acc': val_acc})
     
     # Test
     model.eval()
@@ -76,6 +77,8 @@ def train(model, optimizer, criterion, config):
     
     test_acc = 100 * test_correct / test_total
     print(f"Final Test Accuracy: {test_acc:.2f}%")
+    wandb.log({'test_acc': test_acc})
+
     return test_acc
 
 def generate_fold_configurations():
