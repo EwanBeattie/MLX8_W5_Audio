@@ -10,10 +10,10 @@ sweep_config = {
     "method": "bayes", # Can be 'grid', 'random', or 'bayes'
     "metric": {"name": "test_accuracy", "goal": "maximize"},
     "parameters": {
-        "batch_size": {"values": [16, 32, 64]},
-        "learning_rate": {"values": [1e-4, 1e-3, 1e-2]},
-        "num_epochs": {"values": [10, 20, 30]},
-        "dropout": {"values": [0.0, 0.1, 0.3]},
+        "batch_size": {"values": [16, 128, 256]},
+        "learning_rate": {"values": [1e-2]},
+        "num_epochs": {"values": [10]},
+        "dropout": {"values": [0.3]},
     },
 }
 
