@@ -83,7 +83,7 @@ def train(config):
     
     test_acc = 100 * test_correct / test_total
     print(f"Final Test Accuracy: {test_acc:.2f}%")
-    wandb.log({'test_acc': test_acc})
+    wandb.log({'test_accuracy': test_acc})
     wandb.finish()
 
     return test_acc
@@ -109,16 +109,15 @@ def config_train(config = None):
         config = sweep_config
 
     test_accuracies = []
-    for i in range(config['num_configs']):
-        run_name = f'test-config-{i+1}'
-        wandb.init(entity=run_config['entity'], project=run_config['project'], config=config, name=run_name)
-        wandb_config = wandb.config
+    # for i in range(config['num_configs']):
+    wandb.init(entity=run_config['entity'], project=run_config['project'], config=config)
+    wandb_config = wandb.config
 
-        print(f"\n{'='*50}")
-        print(f"CONFIGURATION {i+1}")
-        print(f"{'='*50}")
-        test_accuracy = train(wandb_config)
-        test_accuracies.append(test_accuracy)
+    # print(f"\n{'='*50}")
+    # print(f"CONFIGURATION {i+1}")
+    # print(f"{'='*50}")
+    test_accuracy = train(wandb_config)
+    test_accuracies.append(test_accuracy)
     
     avg_test_accuracy = sum(test_accuracies) / len(test_accuracies)
     print(f"\nAverage Test Accuracy across all configurations: {avg_test_accuracy:.2f}%")
