@@ -18,6 +18,7 @@ def train(config):
     
     # Get fold splits
     train_indices, val_indices, test_indices = get_fold_splits(ds, train_folds, [val_folds], [test_folds])
+
     
     # Create dataloaders
     train_loader = DataLoader(Subset(ds, train_indices), batch_size=config.batch_size, shuffle=True)

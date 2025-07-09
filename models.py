@@ -23,17 +23,16 @@ class CNN(nn.Module):
        self.bn2 = nn.BatchNorm2d(64)
        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
        
-       # 3rd convolutional block
+       # 3rd convolutional block - no pooling to preserve more spatial info
        self.conv3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1)
        self.bn3 = nn.BatchNorm2d(128)
-       self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
        
-       # Adaptive pooling to handle variable time dimensions
-       self.adaptive_pool = nn.AdaptiveAvgPool2d((1, 1))
+       # Global Average Pooling instead of aggressive pooling
+       self.global_pool = nn.AdaptiveAvgPool2d((1, 1))
        
        # Fully connected layers
        self.fc1 = nn.Linear(128, 64)
-       self.dropout1 = nn.Dropout(0.5)
+       self.dropout1 = nn.Dropout(0.3)  # Reduced dropout
        self.fc2 = nn.Linear(64, num_classes)
 
    def forward(self, x):
@@ -54,12 +53,11 @@ class CNN(nn.Module):
        x = F.relu(self.bn2(self.conv2(x)))
        x = self.pool2(x)
        
-       # 3rd convolutional block
+       # 3rd convolutional block (no pooling)
        x = F.relu(self.bn3(self.conv3(x)))
-       x = self.pool3(x)
        
-       # Adaptive pooling to get fixed size
-       x = self.adaptive_pool(x)  # Output: [batch, 128, 1, 1]
+       # Global average pooling to preserve spatial features
+       x = self.global_pool(x)  # Output: [batch, 128, 1, 1]
        x = x.view(x.size(0), -1)  # Flatten: [batch, 128]
        
        # Fully connected layers

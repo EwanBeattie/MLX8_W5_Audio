@@ -39,6 +39,9 @@ def preprocess_dataset(dataset):
         # Apply log scaling for better representation
         log_mel_spec = torch.log(mel_spec + 1e-8)
         
+        # Normalize the spectrogram
+        log_mel_spec = (log_mel_spec - log_mel_spec.mean()) / (log_mel_spec.std() + 1e-8)
+        
         processed_sample = {
             'audio': log_mel_spec.unsqueeze(0),  # Add channel dim: [1, n_mels, time]
             'label': sample['classID'],
@@ -68,6 +71,7 @@ def load_or_cache_dataset(raw_cache_path="raw_dataset.pkl", processed_cache_path
     else:
         print("Downloading dataset...")
         raw_ds = load_dataset("danavery/urbansound8K", split="train")
+        # raw_ds = load_dataset("danavery/urbansound8K", split="train[:20]")
         print(f"Saving raw dataset to {raw_cache_path}")
         with open(raw_cache_path, 'wb') as f:
             pickle.dump(raw_ds, f)
