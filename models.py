@@ -3,13 +3,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class CNN(nn.Module):
-   def __init__(self, in_channels=1, num_classes=10):
+   def __init__(self, in_channels=1, num_classes=10, dropout=0.1):
        """
        2D CNN for mel spectrogram classification.
 
        Parameters:
            * in_channels: Number of input channels (1 for single-channel spectrograms)
            * num_classes: Number of classes to predict (10 for UrbanSound8K)
+           * dropout: Dropout rate for regularization
        """
        super(CNN, self).__init__()
 
@@ -32,7 +33,7 @@ class CNN(nn.Module):
        
        # Fully connected layers
        self.fc1 = nn.Linear(128, 64)
-       self.dropout1 = nn.Dropout(0.3)  # Reduced dropout
+       self.dropout1 = nn.Dropout(dropout)
        self.fc2 = nn.Linear(64, num_classes)
 
    def forward(self, x):

@@ -19,16 +19,16 @@ def train(config):
     # Get fold splits
     train_indices, val_indices, test_indices = get_fold_splits(ds, train_folds, [val_folds], [test_folds])
 
-    
+
     # Create dataloaders
     train_loader = DataLoader(Subset(ds, train_indices), batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(Subset(ds, val_indices), batch_size=config.batch_size, shuffle=False)
     test_loader = DataLoader(Subset(ds, test_indices), batch_size=config.batch_size, shuffle=False)
 
     # Initialize model
-    model = CNN(in_channels=1, num_classes=10).to(device)
+    model = CNN(in_channels=1, num_classes=10, dropout=config.dropout).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 
     # Training loop
     for epoch in range(config.num_epochs):

@@ -3,6 +3,7 @@ hyperparameters = {
     'learning_rate': 0.001,
     'num_epochs': 20,
     'num_configs': 1,
+    'dropout': 0,
 }
 
 sweep_config = {
