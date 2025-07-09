@@ -13,9 +13,12 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 def train(config):
     """Train model with specified fold configuration."""
-    train_folds, val_folds, test_folds = generate_fold_configurations()
+    # train_folds, val_folds, test_folds = generate_fold_configurations()
     print(f"\nTraining with folds - Train: {train_folds}, Val: {val_folds}, Test: {test_folds}")
-    
+    train_folds = [3, 4, 5, 6, 7, 8, 9, 10]
+    val_folds = 2
+    test_folds = 1
+
     # Get fold splits
     train_indices, val_indices, test_indices = get_fold_splits(ds, train_folds, [val_folds], [test_folds])
 
@@ -133,7 +136,7 @@ if run_config['run_type'] == 'sweep':
         sweep_id=sweep_id,
         function=config_train,
         project=run_config['project'],
-        count=5,
+        count=50,
     )
 elif run_config['run_type'] == 'train':
     trained_weights = config_train(hyperparameters)
