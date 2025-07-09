@@ -33,16 +33,6 @@ def train(config):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 
-    # Add these debug prints to your train function
-    print(f"Train samples: {len(train_indices)}")
-    print(f"Batch size: {config.batch_size}")
-    print(f"Batches per epoch: {len(train_loader)}")
-    print(f"Model params: {sum(p.numel() for p in model.parameters())}")
-
-    # Check spectrogram size
-    sample = ds[0]
-    print(f"Spectrogram shape: {sample['audio'].shape}")
-    
     # Training loop
     for epoch in range(config.num_epochs):
         model.train()
